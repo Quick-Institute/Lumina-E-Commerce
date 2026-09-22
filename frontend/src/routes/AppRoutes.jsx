@@ -17,15 +17,15 @@ export default function AppRoutes() {
                 <Route index element={<Home/>}/>
 
                 {/* Company & Help Pages */}
-                <Route path={"our-story"} element={<InfoPage page="our-story"/>} />
-                <Route path={"careers"} element={<InfoPage page="careers"/>} />
-                <Route path={"press"} element={<InfoPage page="press"/>} />
-                <Route path={"blog"} element={<InfoPage page="blog"/>} />
+                <Route path={"our-story"} element={<InfoPage slug="our-story"/>} />
+                <Route path={"careers"} element={<InfoPage slug="careers"/>} />
+                <Route path={"press"} element={<InfoPage slug="press"/>} />
+                <Route path={"blog"} element={<InfoPage slug="blog"/>} />
 
-                <Route path={"customer-service"} element={<InfoPage page="customer-service"/>} />
-                <Route path={"returns"} element={<InfoPage page="returns"/>} />
-                <Route path={"shipping-info"} element={<InfoPage page="shipping-info"/>} />
-                <Route path={"privacy-policy"} element={<InfoPage page="privacy-policy"/>} />
+                <Route path={"customer-service"} element={<InfoPage slug="customer-service"/>} />
+                <Route path={"returns"} element={<InfoPage slug="returns"/>} />
+                <Route path={"shipping-info"} element={<InfoPage slug="shipping-info"/>} />
+                <Route path={"privacy-policy"} element={<InfoPage slug="privacy-policy"/>} />
             </Route>
         </Routes>
     )

@@ -47,7 +47,7 @@ const Bullets = ({title, items}) => (
                 <li key={b.label} className="flex gap-3">
                     <span className="mt-[7px] h-2 w-2 shrink-0 rounded-full bg-primary-500" aria-hidden="true"/>
                     <p className="text-[15px] leading-relaxed text-slate-600">
-                        <span className="font-bold text-ink-900">{b.label} — </span>
+                        <span className="font-bold text-ink-900">{b.label} - </span>
                         {b.text}
                     </p>
                 </li>
@@ -109,7 +109,7 @@ const Roles = ({title, items}) => (
                     <p className="mt-1 text-xs font-bold uppercase tracking-wide text-slate-400">{r.location}</p>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">{r.blurb}</p>
                     <a
-                        href={`mailto:careers@lumina.lk?subject=${encodeURIComponent(`Application — ${r.title}`)}`}
+                        href={`mailto:careers@lumina.lk?subject=${encodeURIComponent(`Application - ${r.title}`)}`}
                         className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary-600 hover:underline"
                     >
                         Apply by email <FaEnvelope size={12}/>
