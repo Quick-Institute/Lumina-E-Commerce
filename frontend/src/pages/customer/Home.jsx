@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import {FaArrowRight, FaTruckFast} from "react-icons/fa6";
+import {FaArrowRight} from "react-icons/fa6";
 import Button from "../../components/ui/Button";
 import CategoryIcon from "../../components/ui/CategoryIcon";
 import ProductGrid from "../../components/product/ProductGrid";
@@ -138,7 +138,7 @@ export default function Home() {
                 <div className="flex items-end justify-between gap-4">
                     <h2 className="text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">Popular Right
                         Now</h2>
-                    <Link to="/shop"
+                    <Link to="/shop?sort=popular"
                           className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-primary-600 hover:text-primary-700">
                         View All <FaArrowRight size={12}/>
                     </Link>

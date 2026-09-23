@@ -6,6 +6,7 @@ import MainLayout from "../layouts/MainLayout";
 
 // Customer Public Routes
 import Home from "../pages/customer/Home";
+import Cart from "../pages/customer/Cart";
 
 // Company & Help Pages
 import InfoPage from "../pages/info/InfoPage";
@@ -15,6 +16,7 @@ export default function AppRoutes() {
         <Routes>
             <Route path="/" element={<MainLayout/>}>
                 <Route index element={<Home/>}/>
+                <Route path={"cart"} element={<Cart/>}/>
 
                 {/* Company & Help Pages */}
                 <Route path={"our-story"} element={<InfoPage slug="our-story"/>} />

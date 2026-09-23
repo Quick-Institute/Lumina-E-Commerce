@@ -1,7 +1,11 @@
 import store from "../data/store";
 import api, {isBackendConfigured} from "./api";
+import {rankBySearch, tokenize} from "../utils/search";
 
 const delay = (ms = 160) => new Promise((res) => setTimeout(res, ms));
+
+/** Units sold to date, with review count as the legacy fallback. */
+const popularityOf = (p) => (p.soldCount ?? 0) * 100 + (p.reviewCount ?? 0);
 
 export function sortProducts(list, sort) {
     const arr = [...list];
@@ -12,6 +16,8 @@ export function sortProducts(list, sort) {
             return arr.sort((a, b) => b.price - a.price);
         case "rating":
             return arr.sort((a, b) => b.rating - a.rating);
+        case "popular":
+            return arr.sort((a, b) => popularityOf(b) - popularityOf(a));
         case "newest":
         default:
             return arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -43,11 +49,10 @@ export async function listProducts(query = {}) {
     if (status) items = items.filter((p) => p.status === status);
     else if (!includeAll) items = items.filter((p) => p.status === "Active");
     if (sellerId) items = items.filter((p) => p.sellerId === sellerId);
-    if (search.trim()) {
-        const q = search.trim().toLowerCase();
-        items = items.filter(
-            (p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-        );
+    const hasSearch = tokenize(search).length > 0;
+    if (hasSearch) {
+        // fuzzy, order-insensitive relevance ranking (see utils/search.js)
+        items = rankBySearch(items, search);
     }
     if (categories.length) items = items.filter((p) => categories.includes(p.category));
     if (min !== undefined && min !== "" && !Number.isNaN(Number(min)))
@@ -57,7 +62,7 @@ export async function listProducts(query = {}) {
     if (availability === "in") items = items.filter((p) => p.stock > 0);
     if (availability === "out") items = items.filter((p) => p.stock === 0);
 
-    items = sortProducts(items, sort);
+    if (!hasSearch || (sort && sort !== "newest")) items = sortProducts(items, sort);
     const total = items.length;
     const pages = Math.max(1, Math.ceil(total / perPage));
     const safePage = Math.min(Math.max(1, Number(page)), pages);
@@ -95,7 +100,14 @@ export async function getFeaturedProducts(limit = 4) {
 
 export async function getPopularProducts(limit = 4) {
     await delay(100);
-    return store.getProducts().filter((p) => p.popular && p.status === "Active").slice(0, limit);
+    // "Popular Right Now" = genuine best sellers (units sold), same ranking
+    // the storefront's Most Popular sort uses, so the rail and View All agree.
+    const sold = sortProducts(store.getProducts().filter((p) => p.status === "Active"), "popular");
+    if (sold.length >= limit) return sold.slice(0, limit);
+    const extra = store
+        .getProducts()
+        .filter((p) => p.popular && p.status === "Active" && !sold.some((x) => x.id === p.id));
+    return [...sold, ...extra].slice(0, limit);
 }
 
 export async function getSellerProducts(sellerId) {

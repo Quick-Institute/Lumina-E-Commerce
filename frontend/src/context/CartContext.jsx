@@ -28,18 +28,54 @@ export function CartProvider({children}) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     }, [items]);
 
-    const add = useCallback((productId, qty = 1) => {
-        setItems((prev) => {
+    const add = useCallback(
+        (productId, qty = 1) => {
             const product = store.getProductById(productId);
-            const existing = prev.find((i) => i.productId === productId);
-            const current = existing ? existing.qty : 0;
-            const capped = Math.min(current + qty, Math.max(1, product?.stock ?? 99));
-            if (existing) {
-                return prev.map((i) => (i.productId === productId ? {...i, qty: capped} : i));
+            const stock = product ? product.stock : 0;
+            const current = items.find((i) => i.productId === productId)?.qty ?? 0;
+            const next = Math.min(current + qty, stock);
+            const applied = Math.max(0, next - current);
+
+            if (applied > 0) {
+                setItems((prev) => {
+                    const existing = prev.find((i) => i.productId === productId);
+                    const base = existing ? existing.qty : 0;
+                    const cappedNext = Math.min(base + qty, stock);
+                    if (cappedNext === base) return prev;
+                    return existing
+                        ? prev.map((i) => (i.productId === productId ? {...i, qty: cappedNext} : i))
+                        : [...prev, {productId, qty: cappedNext}];
+                });
             }
-            return [...prev, {productId, qty: Math.min(qty, Math.max(1, product?.stock ?? 99))}];
-        });
-    }, []);
+
+            return {
+                added: applied,
+                requested: qty,
+                inCart: current + applied,
+                stock,
+                soldOut: stock === 0,
+                capped: applied > 0 && applied < qty,
+                atLimit: applied === 0 && current >= stock,
+            };
+        },
+        [items]
+    );
+
+    /** Live stock vs. what this cart already holds. */
+    const stockInfo = useCallback(
+        (productId) => {
+            const product = store.getProductById(productId);
+            const stock = product ? product.stock : 0;
+            const inCart = items.find((i) => i.productId === productId)?.qty ?? 0;
+            return {
+                stock,
+                inCart,
+                remaining: Math.max(0, stock - inCart),
+                available: stock > 0 && !!product && product.status === "Active"
+            };
+        },
+        [items]
+    );
 
     const setQty = useCallback((productId, qty) => {
         setItems((prev) => {
@@ -78,8 +114,19 @@ export function CartProvider({children}) {
     const deliveryFee = subtotal === 0 || subtotal >= 5000 ? 0 : 450;
 
     const value = useMemo(
-        () => ({items: lines, count, subtotal, deliveryFee, total: subtotal + deliveryFee, add, remove, setQty, clear}),
-        [lines, count, subtotal, deliveryFee, add, remove, setQty, clear]
+        () => ({
+            items: lines,
+            count,
+            subtotal,
+            deliveryFee,
+            total: subtotal + deliveryFee,
+            add,
+            remove,
+            setQty,
+            clear,
+            stockInfo
+        }),
+        [lines, count, subtotal, deliveryFee, add, remove, setQty, clear, stockInfo]
     );
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

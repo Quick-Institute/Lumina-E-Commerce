@@ -10,8 +10,10 @@ import {useToast} from "../../context/ToastContext";
 export default function ProductCard({product, priority = false}) {
     const cart = useCart();
     const {notify} = useToast();
-    const out = product.stock === 0;
-    const low = !out && product.stock <= (product.lowStockLevel ?? 5);
+    const info = cart.stockInfo(product.id);
+    const out = info.stock === 0;
+    const maxed = !out && info.remaining <= 0;
+    const low = !out && info.stock <= (product.lowStockLevel ?? 5);
     const discount = product.oldPrice ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0;
 
     return (
@@ -49,20 +51,30 @@ export default function ProductCard({product, priority = false}) {
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                     <RatingStars rating={product.rating} count={product.reviewCount} size={11}/>
-                    {low &&
-                        <span className="text-[10px] font-bold uppercase text-orange-600">{product.stock} left</span>}
+                    {maxed ? (
+                        <span className="text-[10px] font-bold uppercase text-emerald-600">{info.inCart} in cart · all we have</span>
+                    ) : (
+                        low &&
+                        <span className="text-[10px] font-bold uppercase text-orange-600">{info.remaining} left</span>
+                    )}
                 </div>
                 <button
                     type="button"
-                    disabled={out}
+                    disabled={out || maxed}
                     onClick={() => {
-                        cart.add(product.id, 1);
-                        notify(`${product.name} added to cart`);
+                        const res = cart.add(product.id, 1);
+                        if (res.added > 0) {
+                            notify(res.capped ? `Only ${res.stock} in stock — ${res.inCart} now in your cart` : `${product.name} added to cart`, res.capped ? "info" : "success");
+                        } else if (res.soldOut) {
+                            notify(`${product.name} is out of stock`, "error");
+                        } else {
+                            notify(`All ${res.stock} available are already in your cart`, "info");
+                        }
                     }}
                     className="mt-3.5 inline-flex items-center justify-center gap-2 rounded-xl bg-primary-50 py-2 text-xs font-bold text-primary-700 transition-colors hover:bg-primary-600 hover:text-white disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                 >
                     <FaCartPlus size={12}/>
-                    {out ? "Unavailable" : "Add to Cart"}
+                    {out ? "Unavailable" : maxed ? "Max in Cart" : "Add to Cart"}
                 </button>
             </div>
         </article>

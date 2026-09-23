@@ -54,6 +54,7 @@ export const store = {
             id: uid("p"),
             rating: 0,
             reviewCount: 0,
+            soldCount: 0,
             reviews: [],
             ratingBreakdown: null,
             highlights: [],
@@ -255,6 +256,8 @@ export const store = {
         (order.items || []).forEach((it) => {
             const next = Math.max(0, stockOf(it.productId) - it.qty);
             store.setStock(it.productId, next);
+            const prod = state.products.find((x) => x.id === it.productId);
+            if (prod) prod.soldCount = (prod.soldCount || 0) + it.qty; // feeds popularity ranking
         });
         return clone(order);
     },
@@ -274,8 +277,12 @@ export const store = {
             at: now(),
             cancelled: true,
         });
-        /* Stock returns to inventory on cancellation. */
-        (o.items || []).forEach((it) => store.setStock(it.productId, stockOf(it.productId) + it.qty));
+        /* Stock returns to inventory on cancellation; sales counter follows. */
+        (o.items || []).forEach((it) => {
+            store.setStock(it.productId, stockOf(it.productId) + it.qty);
+            const prod = state.products.find((x) => x.id === it.productId);
+            if (prod) prod.soldCount = Math.max(0, (prod.soldCount || 0) - it.qty);
+        });
         return clone(o);
     },
     updateOrderStatus(id, status) {
@@ -299,9 +306,6 @@ export const store = {
         if (status === "Delivered") o.payment = {...o.payment, status: "Paid"};
         if (status === "Cancelled") o.payment = {...o.payment, status: "Cancelled"};
         return clone(o);
-    },
-    nextOrderNumber() {
-        return state.orders[0]?.orderNumber || "#ORD-2026-00187";
     },
 
     /* ── stats ── */

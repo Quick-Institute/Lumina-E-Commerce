@@ -10,6 +10,7 @@ export const FREE_DELIVERY_THRESHOLD = 5000;
 
 export const SORT_OPTIONS = [
     {value: "newest", label: "Newest First"},
+    {value: "popular", label: "Most Popular (Best Selling)"},
     {value: "price-asc", label: "Price: Low to High"},
     {value: "price-desc", label: "Price: High to Low"},
     {value: "rating", label: "Top Rated"},

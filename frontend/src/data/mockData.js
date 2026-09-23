@@ -305,6 +305,7 @@ export const PRODUCTS = [
         oldPrice: 7499,
         rating: 4.9,
         reviewCount: 124,
+        soldCount: 1455, // units sold to date — drives popularity sorting
         stock: 2,
         lowStockLevel: 5,
         status: "Active",
@@ -365,6 +366,7 @@ export const PRODUCTS = [
         oldPrice: 5900,
         rating: 4.5,
         reviewCount: 210,
+        soldCount: 2310, // units sold to date — drives popularity sorting
         stock: 15,
         lowStockLevel: 5,
         status: "Active",
@@ -408,6 +410,7 @@ export const PRODUCTS = [
         oldPrice: 4500,
         rating: 3.8,
         reviewCount: 56,
+        soldCount: 585, // units sold to date — drives popularity sorting
         stock: 8,
         lowStockLevel: 4,
         status: "Active",
@@ -442,6 +445,7 @@ export const PRODUCTS = [
         oldPrice: 12000,
         rating: 4.1,
         reviewCount: 78,
+        soldCount: 831, // units sold to date — drives popularity sorting
         stock: 0,
         lowStockLevel: 4,
         status: "Active",
@@ -485,6 +489,7 @@ export const PRODUCTS = [
         oldPrice: 4990,
         rating: 4.7,
         reviewCount: 162,
+        soldCount: 1874, // units sold to date — drives popularity sorting
         stock: 42,
         lowStockLevel: 10,
         status: "Active",
@@ -512,6 +517,7 @@ export const PRODUCTS = [
         oldPrice: null,
         rating: 4.8,
         reviewCount: 41,
+        soldCount: 402, // units sold to date — drives popularity sorting
         stock: 3,
         lowStockLevel: 5,
         status: "Active",
@@ -539,6 +545,7 @@ export const PRODUCTS = [
         oldPrice: 6200,
         rating: 4.3,
         reviewCount: 87,
+        soldCount: 876, // units sold to date — drives popularity sorting
         stock: 24,
         lowStockLevel: 6,
         status: "Active",
@@ -566,6 +573,7 @@ export const PRODUCTS = [
         oldPrice: 2990,
         rating: 4.6,
         reviewCount: 133,
+        soldCount: 1140, // units sold to date — drives popularity sorting
         stock: 60,
         lowStockLevel: 12,
         status: "Active",
@@ -592,6 +600,7 @@ export const PRODUCTS = [
         oldPrice: 5100,
         rating: 4.4,
         reviewCount: 35,
+        soldCount: 261, // units sold to date — drives popularity sorting
         stock: 11,
         lowStockLevel: 4,
         status: "Active",
@@ -618,6 +627,7 @@ export const PRODUCTS = [
         oldPrice: 2200,
         rating: 4.9,
         reviewCount: 98,
+        soldCount: 1204, // units sold to date — drives popularity sorting
         stock: 2,
         lowStockLevel: 5,
         status: "Active",
@@ -644,6 +654,7 @@ export const PRODUCTS = [
         oldPrice: 1890,
         rating: 4.5,
         reviewCount: 64,
+        soldCount: 690, // units sold to date — drives popularity sorting
         stock: 30,
         lowStockLevel: 8,
         status: "Active",
@@ -670,6 +681,7 @@ export const PRODUCTS = [
         oldPrice: null,
         rating: 4.2,
         reviewCount: 22,
+        soldCount: 355, // units sold to date — drives popularity sorting
         stock: 14,
         lowStockLevel: 5,
         status: "Draft",
@@ -693,6 +705,7 @@ export const PRODUCTS = [
         oldPrice: 4200,
         rating: 4.8,
         reviewCount: 51,
+        soldCount: 318, // units sold to date — drives popularity sorting
         stock: 9,
         lowStockLevel: 4,
         status: "Active",
@@ -716,6 +729,7 @@ export const PRODUCTS = [
         oldPrice: null,
         rating: 4.6,
         reviewCount: 74,
+        soldCount: 702, // units sold to date — drives popularity sorting
         stock: 26,
         lowStockLevel: 6,
         status: "Active",
@@ -739,6 +753,7 @@ export const PRODUCTS = [
         oldPrice: 1150,
         rating: 4.9,
         reviewCount: 118,
+        soldCount: 964, // units sold to date — drives popularity sorting
         stock: 48,
         lowStockLevel: 10,
         status: "Active",
@@ -762,6 +777,7 @@ export const PRODUCTS = [
         oldPrice: null,
         rating: 4.4,
         reviewCount: 39,
+        soldCount: 466, // units sold to date — drives popularity sorting
         stock: 5,
         lowStockLevel: 6,
         status: "Active",

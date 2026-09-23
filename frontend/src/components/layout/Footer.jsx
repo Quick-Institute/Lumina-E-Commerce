@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import {Link} from "react-router-dom";
 import Button from "../ui/Button";
 import {useToast} from "../../context/ToastContext";
+import {FaPhone, FaEnvelope, FaMapLocation} from "react-icons/fa6";
+import {FaFacebookSquare, FaYoutube, FaLinkedin, FaWhatsappSquare} from "react-icons/fa";
 
 const COLS = [
     {
@@ -47,6 +49,21 @@ export default function Footer() {
                         Your one-stop destination for premium products. Quality, style, and convenience in
                         every order.
                     </p>
+                    {/* Contact Information */}
+                    <div className="mt-6 space-y-5 text-sm text-slate-400">
+                        <div className="flex items-center gap-5">
+                            <FaPhone className="text-teal-500" />
+                            <a href="tel:+94762944551" className="hover:text-teal-500">+94 76 294 4551 (Hotline)</a>
+                        </div>
+                        <div className="flex items-center gap-5">
+                            <FaEnvelope className="text-teal-500" />
+                            <a href="mailto:chamindugayanuka2002@gmail.com" className="hover:text-teal-500">chamindugayanuka2002@gmail.com</a>
+                        </div>
+                        <div className="flex items-center gap-5">
+                            <FaMapLocation className="text-teal-500 w-4 h-4" />
+                            <span>No.123, Kiula Place, Upper Street, Padiyathalawa.</span>
+                        </div>
+                    </div>
                 </div>
 
                 {COLS.map((col) => (
@@ -82,11 +99,30 @@ export default function Footer() {
                             Join
                         </Button>
                     </form>
+                    {/*Social Media Links*/}
+                    <div className="mt-6 flex gap-2.5">
+                        <a href="https://web.facebook.com/chamindu.gayanuka.1" target="_blank" rel="noopener noreferrer"
+                           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-slate-300 transition-colors hover:bg-blue-700 hover:text-white">
+                            <FaFacebookSquare size={14} />
+                        </a>
+                        <a href="https://www.youtube.com/@chamindugayanuka/" target="_blank" rel="noopener noreferrer"
+                           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-slate-300 transition-colors hover:bg-red-500 hover:text-white">
+                            <FaYoutube size={14} />
+                        </a>
+                        <a href="https://www.linkedin.com/in/chamindu-gayanuka-244585270/" target="_blank" rel="noopener noreferrer"
+                           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-slate-300 transition-colors hover:bg-blue-700 hover:text-white">
+                            <FaLinkedin size={14} />
+                        </a>
+                        <a href="https://wa.me/94762944551" target="_blank" rel="noopener noreferrer"
+                           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-slate-300 transition-colors hover:bg-green-500 hover:text-white">
+                            <FaWhatsappSquare size={14} />
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <div className="border-t border-white/10">
-                <p className="lum-container py-6 text-center text-sm text-slate-500">
+                <p className="lum-container py-3 text-center text-sm text-slate-500">
                     2026 Lumina Inc. All rights reserved.
                 </p>
             </div>
