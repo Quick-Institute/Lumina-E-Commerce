@@ -171,6 +171,26 @@ Lumina follows a **Client–Server Architecture**.
 
 ---
 
+## ⚙️ Environment Variables
+
+```env
+PORT=5000
+MONGO_URL=mongodb://127.0.0.1:27017/lumina
+JWT_SECRET=change-this-secret
+CLIENT_URL=http://localhost:3000
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-sender@gmail.com
+SMTP_PASS=your-google-app-password
+MAIL_FROM=Lumina <your-sender@gmail.com>
+```
+
+## 🧪 Testing with Postman
+
+Read the [POSTMAN.md](https://github.com/Quick-Institute/Lumina-E-Commerce/blob/main/POSTMAN.md) file for detailed instructions on how to test the API endpoints using Postman.
+
 ## 🗄️ Database Collections
 
 | Collection | Description |
