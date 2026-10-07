@@ -50,10 +50,14 @@ const schema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    avatar: {
+        type: String,
+        default: ""
+    },
     verifyToken: String,
     verifyExpires: Date,
     resetToken: String,
-    resetExpires: Date
+    resetExpires: Date,
 },
     {timestamps: true});
 

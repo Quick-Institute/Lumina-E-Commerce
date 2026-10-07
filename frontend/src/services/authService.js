@@ -1,56 +1,117 @@
-import store from "../data/store";
-
-const delay = (ms = 350) => new Promise((res) => setTimeout(res, ms));
+import api from "./api";
 
 export async function login(email, password) {
-    await delay();
-    const user = store.findUserByEmail(email);
-    if (!user || user.password !== password) {
-        const err = new Error("Invalid email or password. Try a demo account below.");
-        err.code = "INVALID_CREDENTIALS";
+    try {
+        const response = await api.post("/auth/login", {
+            email,
+            password,
+        });
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Invalid email or password.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
         throw err;
     }
-    if (user.status === "Suspended") {
-        const err = new Error("This account is suspended. Please contact support.");
-        err.code = "ACCOUNT_SUSPENDED";
-        throw err;
-    }
-    const seller = user.sellerId ? store.getSellers().find((s) => s.id === user.sellerId) : null;
-    const {password: _pw, ...safe} = user;
-    /* Fake token - decodable shape only. Do NOT trust this for authorization. */
-    const token = `demo-jwt.${btoa(JSON.stringify({sub: safe.id, role: safe.role}))}.mock`;
-    return {user: {...safe, seller}, token};
 }
 
 export async function registerCustomer(data) {
-    await delay();
-    if (store.findUserByEmail(data.email)) {
-        const err = new Error("An account with this email already exists.");
-        err.code = "EMAIL_TAKEN";
+    try {
+        const response = await api.post("/auth/register", data);
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Registration failed.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
         throw err;
     }
-    const user = store.registerUser({...data, role: "Customer"});
-    const token = `demo-jwt.${btoa(JSON.stringify({sub: user.id, role: "Customer"}))}.mock`;
-    return {user, token};
 }
 
 export async function registerSeller(data) {
-    await delay();
-    if (store.findUserByEmail(data.email)) {
-        const err = new Error("An account with this email already exists.");
-        err.code = "EMAIL_TAKEN";
+    try {
+        const response = await api.post("/auth/register-seller", data);
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Seller registration failed.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
         throw err;
     }
-    return {applicationId: `app-${Date.now().toString(36)}`, status: "Pending"};
 }
 
 export async function requestPasswordReset(email) {
-    await delay();
-    /* Always resolve - never leak which emails exist. */
-    return {sent: true, email};
+    try {
+        const response = await api.post("/auth/forgot-password", {
+            email,
+        });
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Unable to process password reset request.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+        throw err;
+    }
 }
 
-export async function resetPassword() {
-    await delay();
-    return {updated: true};
+export async function resetPassword(token, password) {
+    try {
+        const response = await api.post("/auth/reset-password", {
+            token,
+            password,
+        });
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Unable to reset password.";
+
+        throw new Error(message);
+    }
+}
+
+export async function changePassword(currentPassword, newPassword) {
+    try {
+        const response = await api.post("/account/change-password", {
+            currentPassword,
+            newPassword,
+        });
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Unable to change password.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+        throw err;
+    }
+}
+
+export async function verifyEmail(token) {
+    try {
+        const response = await api.get("/auth/verify-email", {
+            params: {token},
+        });
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "Email verification failed.";
+
+        throw new Error(message);
+    }
 }
