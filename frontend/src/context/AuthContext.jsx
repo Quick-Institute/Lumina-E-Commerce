@@ -26,8 +26,12 @@ export function AuthProvider({children}) {
 
     const persist = useCallback((next) => {
         setSession(next);
-        if (next) localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-        else localStorage.removeItem(STORAGE_KEY);
+
+        if (next) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } else {
+            localStorage.removeItem(STORAGE_KEY);
+        }
     }, []);
 
     const login = useCallback(
@@ -48,13 +52,27 @@ export function AuthProvider({children}) {
         [persist]
     );
 
+    // Email verification
+    const verifyEmail = useCallback(async (token) => {
+        const res = await authService.verifyEmail(token);
+        return res;
+    }, []);
+
     const logout = useCallback(() => persist(null), [persist]);
 
     const updateUser = useCallback(
         (patch) => {
             setSession((s) => {
-                const next = {...s, user: {...s.user, ...patch}};
+                const next = {
+                    ...s,
+                    user: {
+                        ...s.user,
+                        ...patch
+                    }
+                };
+
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
                 return next;
             });
         },
@@ -68,20 +86,38 @@ export function AuthProvider({children}) {
             token: session?.token || null,
             isAuthenticated: Boolean(session?.token),
             role: session?.user?.role || null,
+
             login,
             registerCustomer,
+            verifyEmail,
             logout,
             updateUser,
         }),
-        [ready, session, login, registerCustomer, logout, updateUser]
+        [
+            ready,
+            session,
+            login,
+            registerCustomer,
+            verifyEmail,
+            logout,
+            updateUser
+        ]
     );
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
     const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
+
+    if (!ctx) {
+        throw new Error("useAuth must be used within <AuthProvider>");
+    }
+
     return ctx;
 }
 

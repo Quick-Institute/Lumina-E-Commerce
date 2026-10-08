@@ -1,4 +1,5 @@
 import store from "../data/store";
+import api from "./api"
 
 const delay = (ms = 160) => new Promise((res) => setTimeout(res, ms));
 
@@ -110,9 +111,34 @@ export async function getProfile(userId) {
     return store.getUserById(userId);
 }
 
-export async function updateProfile(userId, patch) {
-    await delay(240);
-    return store.updateUser(userId, patch);
+export async function updateProfile(userId, data) {
+    try {
+        const formData = new FormData();
+
+        formData.append("name", data.name);
+        formData.append("phone", data.phone);
+
+        if (data.avatar instanceof File) {
+            formData.append("avatar", data.avatar);
+        }
+
+        const response = await api.patch(
+            "/account/profile",
+            formData
+        );
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to update profile.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+
+        throw err;
+    }
 }
 
 /* Stats */

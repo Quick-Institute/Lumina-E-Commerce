@@ -1,91 +1,175 @@
 import React, {useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {FaKey, FaCircleCheck} from "react-icons/fa6";
+import {Link, useSearchParams} from "react-router-dom";
+import {FaCircleCheck, FaLock} from "react-icons/fa6";
 import {AuthShell, BackToLogin} from "../../layouts/AuthShell";
 import Button from "../../components/ui/Button";
-import {PasswordInput} from "../../components/ui/Input";
-import PasswordRules from "../../components/forms/PasswordRules";
-import {passwordRules, matches} from "../../utils/validation";
+import Input from "../../components/ui/Input";
 import {resetPassword} from "../../services/authService";
-import {useToast} from "../../context/ToastContext";
 
 export default function ResetPassword() {
-    const navigate = useNavigate();
-    const {notify} = useToast();
-    const [form, setForm] = useState({password: "", confirm: ""});
-    const [errors, setErrors] = useState({});
+    const [searchParams] = useSearchParams();
+
+    // Get the real reset token from:
+    // /reset-password?token=xxxxxxxx
+    const token = searchParams.get("token");
+
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [done, setDone] = useState(false);
 
     const submit = async (e) => {
         e.preventDefault();
-        const errs = {};
-        if (!passwordRules(form.password).valid) errs.password = "Password does not meet the requirements";
-        const match = matches(form.confirm, form.password, "Passwords");
-        if (match) errs.confirm = match;
-        setErrors(errs);
-        if (Object.keys(errs).length) return;
+
+        setError("");
+
+        // Make sure the email link contains a token
+        if (!token) {
+            setError("Invalid or missing password reset link.");
+            return;
+        }
+
+        // Validate password
+        if (!password) {
+            setError("Please enter a new password.");
+            return;
+        }
+
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters.");
+            return;
+        }
+
+        // Confirm password
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
         setSubmitting(true);
-        await resetPassword();
-        setSubmitting(false);
-        setDone(true);
-        notify("Password updated - you can sign in now.");
-        setTimeout(() => navigate("/login"), 1600);
+
+        try {
+            await resetPassword(token, password);
+
+            setSuccess(true);
+        } catch (error) {
+            setError(
+                error.message ||
+                "Invalid or expired reset token."
+            );
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
         <AuthShell>
-            <div className="lum-card p-8 text-center sm:p-10">
-                {done ? (
-                    <div className="py-8">
-            <span
-                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-600">
-              <FaCircleCheck/>
-            </span>
-                        <h1 className="mt-6 text-2xl font-extrabold text-ink-900">Password Reset!</h1>
-                        <p className="mt-2 text-sm text-slate-400">Redirecting you to sign in…</p>
+            <div className="lum-card p-8 sm:p-10">
+
+                {success ? (
+                    <div className="py-6 text-center">
+
+                        <span
+                            className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-600"
+                        >
+                            <FaCircleCheck/>
+                        </span>
+
+                        <h1 className="mt-6 text-2xl font-extrabold tracking-tight text-ink-900">
+                            Password Reset Successful
+                        </h1>
+
+                        <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-400">
+                            Your password has been updated successfully.
+                            You can now sign in using your new password.
+                        </p>
+
+                        <div className="mt-8">
+                            <Button
+                                as={Link}
+                                to="/login"
+                                size="lg"
+                                fullWidth
+                            >
+                                Continue to Login
+                            </Button>
+                        </div>
+
                     </div>
                 ) : (
                     <>
-            <span
-                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-xl text-primary-600">
-              <FaKey/>
-            </span>
-                        <h1 className="mt-6 text-2xl font-extrabold tracking-tight text-ink-900">Reset Your
-                            Password</h1>
-                        <p className="mt-3 text-sm text-slate-400">Enter a new password for your account below.</p>
+                        <div className="text-center">
 
-                        <form onSubmit={submit} className="mt-8 space-y-5 text-left" noValidate>
-                            <PasswordInput
+                            <span
+                                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-xl text-primary-600"
+                            >
+                                <FaLock/>
+                            </span>
+
+                            <h1 className="mt-6 text-2xl font-extrabold tracking-tight text-ink-900">
+                                Reset Your Password
+                            </h1>
+
+                            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-400">
+                                Enter your new password below to reset your
+                                Lumina account password.
+                            </p>
+
+                        </div>
+
+                        <form
+                            onSubmit={submit}
+                            className="mt-8"
+                            noValidate
+                        >
+
+                            <Input
                                 label="New Password"
                                 name="new-password"
-                                placeholder="••••••••••••••••"
-                                value={form.password}
-                                onChange={(e) => setForm((f) => ({...f, password: e.target.value}))}
-                                error={errors.password}
-                                autoComplete="new-password"
+                                type="password"
+                                placeholder="Enter your new password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
-                            <PasswordInput
-                                label="Confirm New Password"
-                                name="confirm-password"
-                                placeholder="••••••••••••••••"
-                                value={form.confirm}
-                                onChange={(e) => setForm((f) => ({...f, confirm: e.target.value}))}
-                                error={errors.confirm}
-                                autoComplete="new-password"
-                            />
-                            <div className="rounded-2xl bg-slate-50 p-4">
-                                <PasswordRules value={form.password}/>
+
+                            <div className="mt-5">
+                                <Input
+                                    label="Confirm Password"
+                                    name="confirm-password"
+                                    type="password"
+                                    placeholder="Confirm your new password"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
+                                />
                             </div>
-                            <Button type="submit" size="lg" fullWidth loading={submitting}>
+
+                            {error && (
+                                <p className="mt-4 text-sm text-red-500">
+                                    {error}
+                                </p>
+                            )}
+
+                            <Button
+                                type="submit"
+                                size="lg"
+                                fullWidth
+                                className="mt-6"
+                                loading={submitting}
+                            >
                                 Reset Password
                             </Button>
+
                         </form>
-                        <div className="mt-8 border-t border-slate-100 pt-6">
+
+                        <div className="mt-8 border-t border-slate-100 pt-6 text-center">
                             <BackToLogin/>
                         </div>
                     </>
                 )}
+
             </div>
         </AuthShell>
     );
