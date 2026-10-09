@@ -264,3 +264,87 @@ Content-Type: application/json
   "newPassword": "NewPassword@12345"
 }
 ```
+
+## 5. Categories & Products
+
+### 5.1 List categories
+
+```http
+GET {{baseUrl}}/categories
+```
+
+### 5.2 List products
+
+```http
+GET {{baseUrl}}/products?page=1&perPage=12&sort=newest
+```
+
+Support query parameters:
+```
+search
+category
+min
+max
+availability=all|in|out
+sort=newest|price-asc|price-desc|rating|popular
+page
+perPage
+sellerId
+```
+
+### 5.3 Get product details
+
+```http
+GET {{baseUrl}}/products/{{productId}}
+```
+
+# 6. Orders and Checkout
+
+### 6.1 Place COD order
+
+```http
+POST {{baseUrl}}/orders
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+```
+
+```json
+{
+  "items": [
+    {
+      "productId": "{{productId}}",
+      "qty": 2
+    }
+  ],
+  "deliveryAddress": {
+    "fullName": "John Doe",
+    "phone": "+94771234567",
+    "address": "123 Main Street",
+    "city": "Colombo",
+    "district": "Colombo",
+    "postalCode": "00300"
+  },
+  "deliveryFee": 450,
+  "paymentMethod": "COD"
+}
+```
+
+### 6.2 Customer order history
+
+```http
+GET {{baseUrl}}/orders/mine
+Authorization: Bearer {{customerToken}}
+```
+
+### 6.3 Cancel order
+
+```http
+PATCH {{baseUrl}}/orders/{{orderId}}/cancel
+Authorization: Bearer {{customerToken}}
+```
+
+```json
+{
+  "reason": "Customer changed their mind"
+}
+```

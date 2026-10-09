@@ -1,18 +1,14 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {FaCamera, FaEnvelope, FaPhone, FaShieldHalved, FaUser} from "react-icons/fa6";
+import {FaCamera, FaEnvelope, FaPhone, FaShieldHalved, FaTrash, FaUser} from "react-icons/fa6";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import Badge from "../../../components/ui/Badge";
 import {isEmail, isPhone, required, validate} from "../../../utils/validation";
-import {updateProfile} from "../../../services/accountService";
+import {deleteAvatar, updateProfile} from "../../../services/accountService";
 import {useAuth} from "../../../context/AuthContext";
 import {useToast} from "../../../context/ToastContext";
 import {formatDate} from "../../../utils/format";
-
-const API_URL = process.env.REACT_APP_API_URL;
-
-const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
 export default function Profile() {
     const {user, updateUser} = useAuth();
@@ -32,6 +28,7 @@ export default function Profile() {
 
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
+    const [deletingAvatar, setDeletingAvatar] = useState(false);
 
     useEffect(() => {
         if (!user) return;
@@ -42,16 +39,16 @@ export default function Profile() {
             phone: user.phone || ""
         });
 
-        if (user.avatar) {
-            setAvatarPreview(
-                user.avatar.startsWith("http")
-                    ? user.avatar
-                    : `${SERVER_URL}${user.avatar}`
-            );
-        } else {
-            setAvatarPreview("");
-        }
+        setAvatarPreview(user.avatar || "");
     }, [user]);
+
+    useEffect(() => {
+        return () => {
+            if (avatarPreview?.startsWith("blob:")) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+        };
+    }, [avatarPreview]);
 
     if (!user) return null;
 
@@ -68,18 +65,73 @@ export default function Profile() {
 
         if (!allowedTypes.includes(file.type)) {
             notify("Please select a JPG, PNG or WEBP image.");
+            e.target.value = "";
             return;
         }
 
         if (file.size > 5 * 1024 * 1024) {
             notify("Profile photo must be smaller than 5 MB.");
+            e.target.value = "";
             return;
+        }
+
+        // Remove previous local preview URL if there is one.
+        if (avatarPreview?.startsWith("blob:")) {
+            URL.revokeObjectURL(avatarPreview);
         }
 
         setAvatarFile(file);
 
         const previewUrl = URL.createObjectURL(file);
         setAvatarPreview(previewUrl);
+    };
+
+    const handleDeleteAvatar = async () => {
+        if (!user.avatar) return;
+
+        const confirmed = window.confirm(
+            "Are you sure you want to remove your profile photo?"
+        );
+
+        if (!confirmed) return;
+
+        setDeletingAvatar(true);
+        setErrors({});
+
+        try {
+            await deleteAvatar();
+
+            if (avatarPreview?.startsWith("blob:")) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+
+            setAvatarFile(null);
+            setAvatarPreview("");
+
+            updateUser({
+                avatar: "",
+                avatarPublicId: "",
+                avatarLetter:
+                    user.name
+                        ?.trim()
+                        .charAt(0)
+                        .toUpperCase() || "U"
+            });
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+
+            notify("Profile photo removed successfully.");
+        } catch (error) {
+            setErrors({
+                submit:
+                    error.message ||
+                    "Unable to remove profile photo."
+            });
+        } finally {
+            setDeletingAvatar(false);
+        }
     };
 
     const submit = async (e) => {
@@ -110,16 +162,22 @@ export default function Profile() {
                 name: updatedUser.name,
                 phone: updatedUser.phone,
                 avatar: updatedUser.avatar,
-                avatarLetter: updatedUser.name
-                    ?.trim()
-                    .charAt(0)
-                    .toUpperCase()
+                avatarPublicId: updatedUser.avatarPublicId,
+                avatarLetter:
+                    updatedUser.name
+                        ?.trim()
+                        .charAt(0)
+                        .toUpperCase() || "U"
             });
 
             setAvatarFile(null);
+            setAvatarPreview(updatedUser.avatar || "");
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
 
             notify("Profile updated successfully.");
-
         } catch (error) {
             setErrors({
                 submit:
@@ -132,6 +190,10 @@ export default function Profile() {
     };
 
     const resetForm = () => {
+        if (avatarPreview?.startsWith("blob:")) {
+            URL.revokeObjectURL(avatarPreview);
+        }
+
         setForm({
             name: user.name || "",
             email: user.email || "",
@@ -139,18 +201,12 @@ export default function Profile() {
         });
 
         setAvatarFile(null);
-
-        if (user.avatar) {
-            setAvatarPreview(
-                user.avatar.startsWith("http")
-                    ? user.avatar
-                    : `${SERVER_URL}${user.avatar}`
-            );
-        } else {
-            setAvatarPreview("");
-        }
-
+        setAvatarPreview(user.avatar || "");
         setErrors({});
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
     return (
@@ -165,6 +221,7 @@ export default function Profile() {
 
             <div className="mt-7 grid items-start gap-6 lg:grid-cols-[1fr_340px]">
 
+                {/* Personal Information */}
                 <form
                     onSubmit={submit}
                     className="lum-card p-6 sm:p-8"
@@ -173,67 +230,6 @@ export default function Profile() {
                     <h2 className="border-b border-slate-100 pb-4 text-base font-extrabold tracking-tight text-ink-900">
                         Personal Information
                     </h2>
-
-                    <div className="mt-6 flex flex-col items-center sm:flex-row sm:items-start sm:gap-6">
-
-                        <div className="relative">
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="group relative flex h-24 w-24 overflow-hidden rounded-full bg-primary-100 text-3xl font-extrabold text-primary-700 ring-4 ring-primary-50"
-                            >
-                                {avatarPreview ? (
-                                    <img
-                                        src={avatarPreview}
-                                        alt="Profile"
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <span className="flex h-full w-full items-center justify-center">
-                                        {user.avatarLetter ||
-                                            user.name?.charAt(0)}
-                                    </span>
-                                )}
-
-                                <span
-                                    className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition group-hover:opacity-100"
-                                >
-                                    <FaCamera/>
-                                </span>
-                            </button>
-
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp"
-                                className="hidden"
-                                onChange={handleAvatarChange}
-                            />
-                        </div>
-
-                        <div className="mt-4 text-center sm:mt-2 sm:text-left">
-                            <p className="text-sm font-extrabold text-ink-900">
-                                Profile Photo
-                            </p>
-
-                            <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                                JPG, PNG or WEBP. Maximum 5 MB.
-                            </p>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="mt-3"
-                                onClick={() =>
-                                    fileInputRef.current?.click()
-                                }
-                            >
-                                Upload Photo
-                            </Button>
-                        </div>
-
-                    </div>
 
                     <div className="mt-7 grid gap-5 sm:grid-cols-2">
 
@@ -304,23 +300,97 @@ export default function Profile() {
                     </div>
                 </form>
 
+                {/* Right column */}
                 <div className="space-y-6">
 
+                    {/* Profile Photo */}
                     <div className="lum-card p-6 text-center">
 
-                        <span
-                            className="mx-auto flex h-20 w-20 overflow-hidden items-center justify-center rounded-full bg-primary-100 text-2xl font-extrabold text-primary-700 ring-4 ring-primary-50">
-                            {avatarPreview ? (
-                                <img
-                                    src={avatarPreview}
-                                    alt={user.name}
-                                    className="h-full w-full object-cover"
+                        <div className="mt-6 flex flex-col items-center sm:flex-row sm:items-start sm:gap-6">
+
+                            <div className="relative">
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        fileInputRef.current?.click()
+                                    }
+                                    disabled={deletingAvatar}
+                                    className="group relative flex h-24 w-24 overflow-hidden rounded-full bg-primary-100 text-3xl font-extrabold text-primary-700 ring-4 ring-primary-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {avatarPreview ? (
+                                        <img
+                                            src={avatarPreview}
+                                            alt="Profile"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="flex h-full w-full items-center justify-center">
+                                            {user.avatarLetter ||
+                                                user.name
+                                                    ?.charAt(0)
+                                                    ?.toUpperCase() ||
+                                                "U"}
+                                        </span>
+                                    )}
+
+                                    <span
+                                        className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition group-hover:opacity-100"
+                                    >
+                                        <FaCamera/>
+                                    </span>
+                                </button>
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                    onChange={handleAvatarChange}
                                 />
-                            ) : (
-                                user.avatarLetter ||
-                                user.name.charAt(0)
-                            )}
-                        </span>
+                            </div>
+
+                            <div className="mt-4 text-center sm:mt-2 sm:text-left">
+
+                                <p className="text-sm font-extrabold text-ink-900">
+                                    Profile Photo
+                                </p>
+
+                                <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                                    JPG, PNG or WEBP. Maximum 5 MB.
+                                </p>
+
+                                <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() =>
+                                            fileInputRef.current?.click()
+                                        }
+                                        disabled={deletingAvatar}
+                                    >
+                                        Upload Photo
+                                    </Button>
+
+                                    {user.avatar && !avatarFile && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-red-200 text-red-600 hover:bg-red-50"
+                                            onClick={handleDeleteAvatar}
+                                            loading={deletingAvatar}
+                                        >
+                                            <FaTrash className="mr-1.5"/>
+                                            Remove
+                                        </Button>
+                                    )}
+
+                                </div>
+                            </div>
+                        </div>
 
                         <p className="mt-4 text-lg font-extrabold text-ink-900">
                             {user.name}
@@ -351,6 +421,7 @@ export default function Profile() {
                         </p>
                     </div>
 
+                    {/* Security */}
                     <div className="lum-card p-6">
 
                         <h3 className="flex items-center gap-2 text-sm font-extrabold text-ink-900">
@@ -375,7 +446,6 @@ export default function Profile() {
                         </Button>
 
                     </div>
-
                 </div>
             </div>
         </div>

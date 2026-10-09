@@ -54,6 +54,10 @@ const schema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    avatarPublicId: {
+        type: String,
+        default: ""
+    },
     verifyToken: String,
     verifyExpires: Date,
     resetToken: String,

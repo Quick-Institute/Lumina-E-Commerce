@@ -185,6 +185,10 @@ SMTP_SECURE=false
 SMTP_USER=your-sender@gmail.com
 SMTP_PASS=your-google-app-password
 MAIL_FROM=Lumina <your-sender@gmail.com>
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ## 🧪 Testing with Postman
