@@ -141,6 +141,109 @@ export async function updateProfile(userId, data) {
     }
 }
 
+export async function deleteAvatar() {
+    try {
+        const response = await api.delete("/account/profile/avatar");
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to remove profile photo.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+
+        throw err;
+    }
+}
+
+// Customer addresses
+
+export async function getAddresses() {
+    try {
+        const response = await api.get("/account/addresses");
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to load addresses.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+
+        throw err;
+    }
+}
+
+
+export async function addAddress(data) {
+    try {
+        const response = await api.post(
+            "/account/addresses",
+            data
+        );
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to add address.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+
+        throw err;
+    }
+}
+
+
+export async function updateAddress(addressId, data) {
+    try {
+        const response = await api.patch(
+            `/account/addresses/${addressId}`,
+            data
+        );
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to update address.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+
+        throw err;
+    }
+}
+
+
+export async function deleteAddress(addressId) {
+    try {
+        const response = await api.delete(
+            `/account/addresses/${addressId}`
+        );
+
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to remove address.";
+
+        const err = new Error(message);
+        err.code = error.response?.status;
+
+        throw err;
+    }
+}
+
 /* Stats */
 export async function getPlatformStats() {
     await delay(200);

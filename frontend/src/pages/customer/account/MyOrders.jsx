@@ -113,10 +113,6 @@ export default function MyOrders() {
                     <h1 className="text-3xl font-extrabold tracking-tight text-ink-900">My Orders</h1>
                     <p className="mt-1.5 text-sm text-slate-500">Track and manage your recent and historical orders.</p>
                 </div>
-                <Button variant="secondary" size="sm" icon={<FaWandMagicSparkles size={11} className="text-slate-400"/>}
-                        onClick={() => setDemoEmpty((v) => !v)}>
-                    {demoEmpty ? "Show real data" : "Toggle empty state demo"}
-                </Button>
             </div>
 
             <div className="mt-7">
