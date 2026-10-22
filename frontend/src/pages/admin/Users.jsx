@@ -239,7 +239,7 @@ export default function AdminUsers() {
                         aria-label="Filter by role"
                         value={tab}
                         onChange={(e) => setTab(e.target.value)}
-                        className="h-10 w-full px-3 text-sm sm:w-auto sm:min-w-32"
+                        className="h-12 w-full px-4 text-sm sm:w-auto sm:min-w-36"
                     >
                         <option value="All">Role: All</option>
                         <option value="Customer">Customers</option>
@@ -251,7 +251,7 @@ export default function AdminUsers() {
                         aria-label="Filter by status"
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="h-10 w-full px-3 text-sm sm:w-auto sm:min-w-32"
+                        className="h-12 w-full px-4 text-sm sm:w-auto sm:min-w-36"
                     >
                         <option value="">Status: All</option>
                         <option value="Active">Active</option>
@@ -262,7 +262,7 @@ export default function AdminUsers() {
                         aria-label="Filter by registration date"
                         value={reg}
                         onChange={(e) => setReg(e.target.value)}
-                        className="h-10 w-full px-3 text-sm sm:w-auto sm:min-w-40"
+                        className="h-12 w-full px-4 text-sm sm:w-auto sm:min-w-44"
                     >
                         {REG_RANGES.map((r) => (
                             <option key={r.value} value={r.value}>
@@ -381,7 +381,8 @@ export default function AdminUsers() {
                                         />
                                         <div
                                             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-ink-700">
-                                            {(u.name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                                            {u.avatar ? <img src={u.avatar} alt={u.name || "User"}
+                                                             className="h-full w-full rounded-full object-cover"/> : (u.name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("")}
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate font-bold text-ink-900">{u.name}</p>
@@ -447,7 +448,8 @@ export default function AdminUsers() {
                                             >
                                                     <span
                                                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-ink-700">
-                                                        {(u.name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                                                        {u.avatar ? <img src={u.avatar} alt={u.name || "User"}
+                                                                         className="h-full w-full rounded-full object-cover"/> : (u.name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("")}
                                                     </span>
                                                 <span
                                                     className="truncate font-bold text-ink-900 hover:text-primary-700">

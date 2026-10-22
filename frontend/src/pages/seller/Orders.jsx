@@ -9,7 +9,7 @@ import DataTable from "../../components/ui/DataTable";
 import Modal from "../../components/ui/Modal";
 import {PageSpinner} from "../../components/ui/Spinner";
 import {EmptyState} from "../../components/ui/States";
-import {formatPrice, formatDate, formatDateTime} from "../../utils/format";
+import {formatDate, formatDateTime, formatPrice} from "../../utils/format";
 import {getSellerOrders, updateOrderStatus} from "../../services/orderService";
 import {allowedNext} from "../../utils/orderFlow";
 import {useAuth} from "../../context/AuthContext";
@@ -20,7 +20,7 @@ export default function SellerOrders() {
     const navigate = useNavigate();
     const {notify} = useToast();
     const {user} = useAuth();
-    const sellerId = user?.sellerId || "s1";
+    const sellerId = user?._id || user?.id;
 
     const [orders, setOrders] = useState(null);
     const [tab, setTab] = useState("All");
@@ -133,12 +133,18 @@ export default function SellerOrders() {
                     icon={
                         <FaTruckFast size={12} className="text-primary-600"/>
                     }
-                    onClick={() =>
-                        notify(
-                            "Bulk CSV fulfilment lands with the backend phase.",
-                            "info"
-                        )
-                    }
+                    onClick={() => {
+                        const headers = ["orderNumber", "customerName", "status", "paymentMethod", "totalAmount", "placedAt"];
+                        const csv = [headers.join(","), ...orders.map(order => headers.map(key => JSON.stringify(order[key] ?? "")).join(","))].join("\n");
+                        const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = "seller-orders.csv";
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        notify("Orders exported successfully.", "success");
+                    }}
                 >
                     Export / bulk fulfil
                 </Button>
@@ -363,13 +369,13 @@ export default function SellerOrders() {
                             type="button"
                             disabled={updating}
                             onClick={() => advance(status)}
-                            className={`flex w-full flex-col gap-2 rounded-xl border-2 px-4 py-3.5 text-left transition-all hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60 sm:flex-row sm:items-center sm:justify-between ${
+                            className={`flex w-full min-w-0 flex-col gap-3 rounded-xl border-2 px-3 py-3 text-left transition-all hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60 sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3.5 ${
                                 status === "Cancelled"
                                     ? "border-red-200 bg-red-50/40 hover:border-red-400"
                                     : "border-slate-200 bg-white hover:border-primary-500"
                             }`}
                         >
-                            <span className="text-sm font-bold leading-snug text-ink-900">
+                            <span className="min-w-0 flex-1 break-words text-sm font-bold leading-snug text-ink-900">
                                 {status === "Processing" &&
                                     "Mark as Processing - pack & label"}
                                 {status === "Shipped" &&
@@ -383,6 +389,7 @@ export default function SellerOrders() {
                                     status === "Cancelled" ? "red" : "teal"
                                 }
                                 uppercase
+                                className="shrink-0 self-start sm:self-center"
                             >
                                 → {status}
                             </Badge>

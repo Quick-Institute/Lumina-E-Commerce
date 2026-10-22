@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Link} from "react-router-dom";
 
-export default function Dropdown({trigger, children, align = "right", width = "w-56", className = ""}) {
+export default function Dropdown({trigger, children, align = "right", width = "w-56", className = "", dropUp = false}) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -36,7 +36,7 @@ export default function Dropdown({trigger, children, align = "right", width = "w
             </button>
             {open && (
                 <div
-                    className={`absolute ${align === "right" ? "right-0" : "left-0"} top-[calc(100%+8px)] ${width} z-50 origin-top overflow-hidden rounded-xl border border-slate-200 bg-white py-1.5 shadow-lift`}
+                    className={`absolute ${align === "right" ? "right-0" : "left-0"} ${dropUp ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"} ${width} z-50 origin-top overflow-hidden rounded-xl border border-slate-200 bg-white py-1.5 shadow-lift`}
                     role="menu"
                 >
                     {React.Children.map(children, (child) =>

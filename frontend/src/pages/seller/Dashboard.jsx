@@ -5,10 +5,10 @@ import StatCard from "../../components/ui/StatCard";
 import Button from "../../components/ui/Button";
 import {OrderStatusBadge, ProductStatusBadge} from "../../components/ui/Badge";
 import DataTable from "../../components/ui/DataTable";
-import {ChartCard, SalesArea, OrdersBar} from "../../components/charts/Charts";
+import {ChartCard, OrdersBar, SalesArea} from "../../components/charts/Charts";
 import ProductImage from "../../components/product/ProductImage";
 import {PageSpinner} from "../../components/ui/Spinner";
-import {formatPrice, formatDate} from "../../utils/format";
+import {formatDate, formatPrice} from "../../utils/format";
 import {getSellerStats} from "../../services/accountService";
 import {getSellerProducts} from "../../services/productService";
 import {getSellerOrders} from "../../services/orderService";
@@ -16,12 +16,13 @@ import {useAuth} from "../../context/AuthContext";
 
 export default function SellerDashboard() {
     const {user} = useAuth();
-    const sellerId = user?.sellerId || "s1";
+    const sellerId = [user?._id, user?.id].find(value => /^[a-f\d]{24}$/i.test(String(value || '')));
     const [stats, setStats] = useState(null);
     const [products, setProducts] = useState(null);
     const [orders, setOrders] = useState(null);
 
     useEffect(() => {
+        if (!sellerId) return undefined;
         let alive = true;
         Promise.all([
             getSellerStats(sellerId),
