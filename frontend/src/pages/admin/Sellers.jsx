@@ -5,6 +5,7 @@ import {
     FaArrowUpRightFromSquare,
     FaCheck,
     FaDownload,
+    FaEllipsisVertical,
     FaEye,
     FaStore,
     FaTriangleExclamation,
@@ -142,7 +143,7 @@ export default function AdminSellers() {
                             setTab(e.target.value);
                             setParams(e.target.value === "All" ? {} : {tab: e.target.value});
                         }}
-                        className="h-10 w-auto px-3 min-w-36 text-sm"
+                        className="h-12 w-auto px-3 min-w-36 text-sm"
                     >
                         {TABS.map((t) => (
                             <option key={t.key} value={t.key}>
@@ -218,10 +219,11 @@ export default function AdminSellers() {
                                                 className="flex items-center gap-3 text-left">
                         <span
                             className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-ink-700">
-                          {(s.storeName || s.name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("")}
+                          {s.avatar ? <img src={s.avatar} alt={s.name || s.storeName}
+                                           className="h-full w-full rounded-full object-cover"/> : (s.name || s.storeName || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("")}
                         </span>
                                             <span
-                                                className="font-bold text-ink-900 hover:text-primary-700">{s.storeName}</span>
+                                                className="font-bold text-ink-900 hover:text-primary-700">{s.name || s.ownerName || s.storeName}</span>
                                         </button>
                                     </td>
                                     <td className="px-4 py-3.5">
@@ -277,9 +279,11 @@ export default function AdminSellers() {
                                             )}
                                             {s.approvalStatus === "Approved" && (
                                                 <Dropdown
+                                                    dropUp
                                                     trigger={(open) => (
-                                                        <span
-                                                            className={`flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 ring-1 ring-slate-200 hover:bg-slate-50 ${open ? "bg-slate-100" : ""}`}>⋮</span>
+                                                        <span aria-label="Seller actions"
+                                                              className={`flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 ring-1 ring-slate-300 hover:bg-slate-50 ${open ? "bg-slate-100" : ""}`}><FaEllipsisVertical
+                                                            size={14}/></span>
                                                     )}
                                                 >
                                                     <DropdownItem icon={<FaEye size={12}/>}

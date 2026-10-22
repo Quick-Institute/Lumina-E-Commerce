@@ -55,7 +55,7 @@ export default function SellerSales() {
                         Sales Overview
                     </h1>
                     <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-                        Revenue performance across your storefront (mock analytics until the API phase).
+                        Revenue performance across your storefront.
                     </p>
                 </div>
 
@@ -63,7 +63,7 @@ export default function SellerSales() {
                     name="salesRange"
                     value={range}
                     onChange={(e) => setRange(e.target.value)}
-                    className="h-10 w-full text-sm sm:w-auto"
+                    className="h-12 w-full text-sm sm:w-auto"
                 >
                     <option value="12m">Last 12 months</option>
                     <option value="6m">Last 6 months</option>

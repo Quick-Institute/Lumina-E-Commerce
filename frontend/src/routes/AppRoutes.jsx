@@ -86,6 +86,16 @@ export default function AppRoutes() {
                 <Route path={"privacy-policy"} element={<InfoPage slug="privacy-policy"/>}/>
             </Route>
 
+            <Route
+                path="/seller-terms-and-conditions"
+                element={<InfoPage slug="seller-terms-and-conditions"/>}
+            />
+
+            <Route
+                path="/marketplace-policy"
+                element={<InfoPage slug="marketplace-policy"/>}
+            />
+
             {/* Authentication */}
             <Route path={"login"} element={<Login/>}/>
             <Route path={"register"} element={<Register/>}/>

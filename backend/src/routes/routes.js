@@ -50,8 +50,8 @@ r.get('/public/sellers/:id', c.publicSeller);
 
 r.get('/products', c.products);
 r.get('/products/:id', c.product);
-r.post('/products', auth, allow('Seller', 'Administrator'), uploadProduct.single('image'), c.create);
-r.put('/products/:id', auth, allow('Seller', 'Administrator'), uploadProduct.single('image'), c.update);
+r.post('/products', auth, allow('Seller', 'Administrator'), uploadProduct.array('images', 6), c.create);
+r.put('/products/:id', auth, allow('Seller', 'Administrator'), uploadProduct.array('images', 6), c.update);
 r.delete('/products/:id', auth, allow('Seller', 'Administrator'), c.remove);
 r.get('/products/:id/reviews', c.reviews);
 r.post('/products/:id/reviews', auth, allow('Customer'), c.addReview);

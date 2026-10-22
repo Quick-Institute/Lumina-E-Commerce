@@ -1,13 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
-import {
-    FaChartLine,
-    FaCircleXmark,
-    FaDownload,
-    FaSackDollar,
-    FaStore,
-    FaTruckFast,
-} from "react-icons/fa6";
+import {FaChartLine, FaCircleXmark, FaDownload, FaSackDollar, FaStore, FaTruckFast,} from "react-icons/fa6";
 
 import {ChartCard, OrdersBar, SalesArea, StatusPie} from "../../components/charts/Charts";
 import DataTable from "../../components/ui/DataTable";
@@ -36,7 +29,7 @@ export default function AdminSalesReport() {
 
     const leaderboard = useMemo(() => {
         if (!orders) return [];
-        const byId = Object.fromEntries((sellers || []).map((s) => [s.id, s]));
+        const byId = Object.fromEntries((sellers || []).map((s) => [String(s.id || s._id), s]));
         const acc = new Map();
         orders
             .filter((o) => o.status !== "Cancelled")
@@ -47,12 +40,13 @@ export default function AdminSalesReport() {
                     ),
                 ];
                 sellerIds.forEach((sid) => {
-                    const prev = acc.get(sid) || {
+                    const key = String(sid);
+                    const prev = acc.get(key) || {
                         seller: byId[sid],
                         revenue: 0,
                         orders: 0,
                     };
-                    acc.set(sid, {
+                    acc.set(key, {
                         ...prev,
                         revenue: prev.revenue + o.totalAmount,
                         orders: prev.orders + 1,
@@ -91,12 +85,18 @@ export default function AdminSalesReport() {
                     variant="secondary"
                     className="w-full shrink-0 sm:w-auto"
                     icon={<FaDownload size={11}/>}
-                    onClick={() =>
-                        notify(
-                            "Report export (PDF/CSV) arrives with the backend phase.",
-                            "info"
-                        )
-                    }
+                    onClick={() => {
+                        const headers = ["orderNumber", "status", "paymentMethod", "subtotal", "deliveryFee", "totalAmount", "placedAt"];
+                        const csv = [headers.join(","), ...orders.map(o => headers.map(h => JSON.stringify(o[h] ?? "")).join(","))].join("\n");
+                        const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = "lumina-sales-report.csv";
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        notify("Sales report exported successfully.", "success");
+                    }}
                 >
                     Export
                 </Button>
@@ -161,7 +161,8 @@ export default function AdminSalesReport() {
                 </ChartCard>
 
                 <section className="lum-card min-w-0 overflow-hidden">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-6">
+                    <div
+                        className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-6">
                         <h3 className="flex items-center gap-2 text-base font-extrabold tracking-tight text-ink-900">
                             <FaStore className="text-primary-600" size={13}/> Seller Leaderboard
                         </h3>

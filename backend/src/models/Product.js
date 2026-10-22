@@ -10,6 +10,10 @@ const schema = new mongoose.Schema({
             label: String,
             value: String
         }],
+        specs: [{
+            label: String,
+            value: String
+        }],
         price: {
             type: Number,
             min: 0,
@@ -22,6 +26,7 @@ const schema = new mongoose.Schema({
         image: String,
         images: [String],
         imagePublicId: String,
+        imagePublicIds: [String],
         stock: {
             type: Number,
             default: 0,

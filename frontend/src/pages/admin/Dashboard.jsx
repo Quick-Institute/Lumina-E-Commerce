@@ -200,7 +200,7 @@ export default function AdminDashboard() {
                     subtitle="Platform-wide revenue tracking"
                     actions={
                         <Select name="dash-range" aria-label="Reporting period" value={range}
-                                onChange={(e) => setRange(e.target.value)} className="h-11 w-auto min-w-36 text-xs">
+                                onChange={(e) => setRange(e.target.value)} className="h-12 w-auto min-w-36 text-xs">
                             <option value="3">Last 3 Months</option>
                             <option value="6">Last 6 Months</option>
                             <option value="12">Last 12 Months</option>

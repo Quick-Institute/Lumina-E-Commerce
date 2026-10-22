@@ -194,7 +194,7 @@ export async function login(req, res) {
     }
 
     if (
-        U.status === 'Suspended' ||
+        U.status !== 'Active' ||
         (U.role === 'Seller' && U.approvalStatus !== 'Approved')
     ) {
         return res.status(403).json({

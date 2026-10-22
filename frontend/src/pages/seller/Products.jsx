@@ -13,7 +13,7 @@ import {EmptyState} from "../../components/ui/States";
 import {PageSpinner} from "../../components/ui/Spinner";
 import ProductImage from "../../components/product/ProductImage";
 import {formatPrice} from "../../utils/format";
-import {getSellerProducts, deleteProduct, toggleProductStatus} from "../../services/productService";
+import {deleteProduct, getSellerProducts, toggleProductStatus} from "../../services/productService";
 import {rankBySearch} from "../../utils/search";
 import {useAuth} from "../../context/AuthContext";
 import {useToast} from "../../context/ToastContext";
@@ -24,7 +24,7 @@ export default function SellerProducts() {
     const navigate = useNavigate();
     const {notify} = useToast();
     const {user} = useAuth();
-    const sellerId = user?.sellerId || "s1";
+    const sellerId = user?._id || user?.id;
 
     const [items, setItems] = useState(null);
     const [search, setSearch] = useState("");
@@ -63,12 +63,13 @@ export default function SellerProducts() {
     };
 
     const toggle = async (p) => {
-        await toggleProductStatus(p.id);
-        notify(
-            p.status === "Active" ? "Product deactivated" : "Product activated",
-            "info"
-        );
-        load();
+        const nextStatus = p.status === "Active" ? "Inactive" : "Active";
+        const updated = await toggleProductStatus(p.id, nextStatus);
+        setItems((current) => (current || []).map(item => item.id === p.id ? {
+            ...item, ...(updated || {}),
+            status: updated?.status || nextStatus
+        } : item));
+        notify(nextStatus === "Inactive" ? "Product deactivated" : "Product activated", "info");
     };
 
     if (!items) {
@@ -172,7 +173,7 @@ export default function SellerProducts() {
                             setStatus(e.target.value);
                             setPage(1);
                         }}
-                        className="h-10 w-full text-sm sm:w-auto sm:min-w-36"
+                        className="h-12 w-full text-sm sm:w-auto sm:min-w-36"
                     >
                         <option value="">All statuses</option>
                         <option value="Active">Active</option>

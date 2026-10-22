@@ -57,7 +57,12 @@ export default function ProductForm() {
         }
     }, [isEdit, productId]);
 
-    const set = (key) => (e) => setForm((f) => ({...f, [key]: e.target.value}));
+    const set = (key) => (e) => {
+        const value = (key === "price" || key === "oldPrice")
+            ? e.target.value.replace(/[^0-9.]/g, "")
+            : e.target.value;
+        setForm((f) => ({...f, [key]: value}));
+    };
     const setSpec = (idx, key, value) =>
         setForm((f) => ({
             ...f,
@@ -65,12 +70,14 @@ export default function ProductForm() {
         }));
 
     const MAX_PHOTOS = 6;
-    const MAX_BYTES = 1024 * 1024;
     const [uploadError, setUploadError] = useState("");
+    const [imageFiles, setImageFiles] = useState([]);
     const fileInputRef = useRef(null);
 
-    const removePhoto = (idx) =>
+    const removePhoto = (idx) => {
         setForm((f) => ({...f, images: f.images.filter((_, i) => i !== idx)}));
+        setImageFiles((files) => files.filter((_, i) => i !== idx));
+    };
 
     const makeCover = (idx) =>
         setForm((f) => {
@@ -101,13 +108,14 @@ export default function ProductForm() {
                 setUploadError(`“${file.name}” is not an image file.`);
                 return;
             }
-            if (file.size > MAX_BYTES) {
+            if (file.size > 8 * 1024 * 1024) {
                 setUploadError(
                     `“${file.name}” is ${(file.size / 1024 / 1024).toFixed(1)} MB - keep uploads under 1 MB.`
                 );
                 return;
             }
 
+            setImageFiles((files) => [...files, file]);
             const reader = new FileReader();
             reader.onload = () =>
                 setForm((f) =>
@@ -152,13 +160,19 @@ export default function ProductForm() {
             status: form.status,
             shortDescription: form.shortDescription.trim(),
             description: form.description.split(/\n\n+/).filter(Boolean),
-            image: form.images[0] || null,
-            images: form.images,
+            image: imageFiles[0] ? null : (form.images[0] || null),
+            images: imageFiles[0] ? [] : form.images.filter((src) => !String(src).startsWith('data:')),
             specs: form.specs.filter((s) => s.label.trim() && s.value.trim()),
         };
 
+        const requestData = new FormData();
+        Object.entries(payload).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) requestData.append(key, Array.isArray(value) ? JSON.stringify(value) : String(value));
+        });
+        imageFiles.forEach(file => requestData.append('images', file));
+
         try {
-            const saved = await saveProduct(payload, isEdit ? productId : undefined);
+            const saved = await saveProduct(requestData, isEdit ? productId : undefined);
             notify(isEdit ? "Product updated" : "Product published to your store");
             navigate("/seller/products", {state: {justSaved: saved.id}});
         } catch (err) {

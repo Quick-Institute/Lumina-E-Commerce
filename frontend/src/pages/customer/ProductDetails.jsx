@@ -83,24 +83,8 @@ export default function ProductDetails() {
     const shots = useMemo(() => {
         if (!product) return [];
 
-        return [
-            {id: 0, zoom: "", label: "Front"},
-            {
-                id: 1,
-                zoom: "scale-[1.6] -translate-x-6 translate-y-3",
-                label: "Detail"
-            },
-            {
-                id: 2,
-                zoom: "scale-[1.25] -rotate-3",
-                label: "Angle"
-            },
-            {
-                id: 3,
-                zoom: "grayscale scale-[1.1]",
-                label: "B&W"
-            },
-        ];
+        const images = product.images?.length ? product.images : [product.image].filter(Boolean);
+        return images.map((src, index) => ({id: index, src, zoom: '', label: `Photo ${index + 1}`}));
     }, [product]);
 
     const scrollCarousel = (dir) => {
@@ -229,7 +213,7 @@ export default function ProductDetails() {
                                 }`}
                             >
                                 <ProductImage
-                                    product={product}
+                                    product={{...product, image: s.src}}
                                     className="h-full w-full"
                                     imgClassName={s.zoom}
                                     iconSize={20}
@@ -244,7 +228,7 @@ export default function ProductDetails() {
                         <div className="aspect-square w-full transition-transform duration-500 hover:scale-105">
 
                             <ProductImage
-                                product={product}
+                                product={{...product, image: shots[activeShot]?.src || product.image}}
                                 className="h-full w-full"
                                 imgClassName={shots[activeShot]?.zoom}
                                 iconSize={110}

@@ -416,6 +416,90 @@ export const INFO_PAGES = {
             },
         ],
     },
+
+    "seller-terms-and-conditions": {
+        title: "Seller Terms & Conditions",
+        intro:
+            "These terms explain the responsibilities of sellers who apply to operate a store on Lumina.",
+        blocks: [
+            {
+                type: "paragraphs",
+                title: "Seller responsibilities",
+                text: [
+                    "Sellers must provide accurate personal, business and product information and keep their store information up to date.",
+                    "Sellers are responsible for product quality, stock accuracy, fulfilment, lawful sales and responding to customer orders."
+                ]
+            },
+            {
+                type: "bullets",
+                title: "By joining Lumina, sellers agree to",
+                items: [
+                    {
+                        label: "Accurate listings",
+                        text: "Descriptions, prices, images and stock must be truthful and current."
+                    },
+                    {
+                        label: "Order fulfilment",
+                        text: "Orders must be prepared and dispatched within a reasonable period."
+                    },
+                    {
+                        label: "Customer care",
+                        text: "Customer questions, returns and applicable complaints must be handled professionally."
+                    },
+                    {
+                        label: "Platform rules",
+                        text: "Sellers must follow Lumina policies and administrator decisions."
+                    }
+                ]
+            },
+            {
+                type: "callout",
+                text: "Seller applications are subject to manual administrator review. Lumina may suspend or reject accounts that breach these terms."
+            }
+        ]
+    },
+
+    "marketplace-policy": {
+        title: "Marketplace Policy",
+        intro:
+            "The rules below help keep Lumina safe, reliable and fair for customers and sellers.",
+        blocks: [
+            {
+                type: "bullets",
+                title: "Prohibited marketplace activity",
+                items: [
+                    {
+                        label: "Illegal goods",
+                        text: "Products must comply with applicable laws and regulations."
+                    },
+                    {
+                        label: "Misleading content",
+                        text: "False claims, copied listings, counterfeit goods and misleading images are not allowed."
+                    },
+                    {
+                        label: "Abuse",
+                        text: "Fraud, harassment, manipulation of reviews and misuse of customer data are prohibited."
+                    },
+                    {
+                        label: "Unsafe products",
+                        text: "Products that create unreasonable safety or health risks may be removed."
+                    }
+                ]
+            },
+            {
+                type: "paragraphs",
+                title: "Enforcement",
+                text: [
+                    "Lumina may remove listings, restrict store features, suspend accounts or reject applications when marketplace rules are breached.",
+                    "Customers should report concerns through the available support channels so they can be reviewed."
+                ]
+            },
+            {
+                type: "callout",
+                text: "By registering as a seller, you confirm that your store and products comply with this Marketplace Policy."
+            }
+        ]
+    },
 };
 
 /** Slugs that the footer links to, kept in sync with AppRoutes. */
