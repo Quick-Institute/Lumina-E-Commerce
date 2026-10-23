@@ -78,11 +78,24 @@ export const product = async (req, res) => {
 };
 export const create = async (req, res) => {
     const data = {...req.body, sellerId: req.user.sub};
-    if (req.file) {
-        const uploaded = await uploadToCloudinary(req.file.buffer, 'lumina/products');
-        data.image = uploaded.secure_url;
-        data.images = [uploaded.secure_url];
-        data.imagePublicId = uploaded.public_id;
+    for (const key of ['description', 'specifications', 'specs', 'images']) if (typeof data[key] === 'string') {
+        try {
+            data[key] = JSON.parse(data[key]);
+        } catch {
+        }
+    }
+    if (Array.isArray(data.description)) data.description = data.description.join('\n\n');
+    if (data.specs && !data.specifications) data.specifications = data.specs;
+    if (data.specifications && !data.specs) data.specs = data.specifications;
+    if (data.specs && !data.specifications) data.specifications = data.specs;
+    if (data.specifications && !data.specs) data.specs = data.specifications;
+
+    if (req.files?.length) {
+        const uploaded = await Promise.all(req.files.map(file => uploadToCloudinary(file.buffer, 'lumina/products')));
+        data.images = uploaded.map(file => file.secure_url);
+        data.image = data.images[0];
+        data.imagePublicId = uploaded[0].public_id;
+        data.imagePublicIds = uploaded.map(file => file.public_id);
     }
     if (data.price !== undefined) data.price = Number(data.price);
     if (data.stock !== undefined) data.stock = Number(data.stock);
@@ -91,17 +104,31 @@ export const create = async (req, res) => {
 export const update = async (req, res) => {
     const filter = {_id: req.params.id, ...(req.user.role === 'Seller' ? {sellerId: req.user.sub} : {})};
     const data = {...req.body};
-    if (req.file) {
+    for (const key of ['description', 'specifications', 'specs', 'images']) if (typeof data[key] === 'string') {
+        try {
+            data[key] = JSON.parse(data[key]);
+        } catch {
+        }
+    }
+    if (Array.isArray(data.description)) data.description = data.description.join('\n\n');
+    if (data.specs && !data.specifications) data.specifications = data.specs;
+    if (data.specifications && !data.specs) data.specs = data.specifications;
+
+    if (req.files?.length) {
         const old = await Product.findOne(filter);
-        const uploaded = await uploadToCloudinary(req.file.buffer, 'lumina/products');
-        data.image = uploaded.secure_url;
-        data.images = [uploaded.secure_url];
-        data.imagePublicId = uploaded.public_id;
-        if (old?.imagePublicId) cloudinary.uploader.destroy(old.imagePublicId).catch(console.error);
+        const uploaded = await Promise.all(req.files.map(file => uploadToCloudinary(file.buffer, 'lumina/products')));
+        data.images = uploaded.map(file => file.secure_url);
+        data.image = data.images[0];
+        data.imagePublicId = uploaded[0].public_id;
+        data.imagePublicIds = uploaded.map(file => file.public_id);
+        const oldIds = old?.imagePublicIds?.length ? old.imagePublicIds : (old?.imagePublicId ? [old.imagePublicId] : []);
+        await Promise.all(oldIds.map(id => cloudinary.uploader.destroy(id).catch(console.error)));
     }
     if (data.price !== undefined) data.price = Number(data.price);
     if (data.stock !== undefined) data.stock = Number(data.stock);
-    res.json(await Product.findOneAndUpdate(filter, data, {new: true}));
+    const updated = await Product.findOneAndUpdate(filter, data, {new: true});
+    if (!updated) return res.status(404).json({message: 'Product not found or not owned by this seller'});
+    res.json(updated);
 };
 export const remove = async (req, res) => {
     const filter = {_id: req.params.id, ...(req.user.role === 'Seller' ? {sellerId: req.user.sub} : {})};
@@ -110,6 +137,7 @@ export const remove = async (req, res) => {
     res.status(204).end()
 };
 export const publicSeller = async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).json({message: 'Store not found'});
     const seller = await User.findOne({
         _id: req.params.id,
         role: 'Seller',
@@ -132,7 +160,13 @@ export const publicSeller = async (req, res) => {
     res.json({seller: data, products});
 };
 export const categories = async (req, res) => res.json(await Category.find({status: 'Active'}));
-export const createCategory = async (req, res) => res.status(201).json(await Category.create(req.body));
+export const createCategory = async (req, res) => {
+    const name = String(req.body.name || '').trim();
+    if (!name) return res.status(400).json({message: 'Category name is required'});
+    const existing = await Category.findOne({name});
+    if (existing) return res.status(409).json({message: 'Category already exists'});
+    return res.status(201).json(await Category.create({...req.body, name}));
+};
 export const reviews = async (req, res) => res.json(await Review.find({productId: req.params.id}).populate('userId', 'name avatar').sort({createdAt: -1}));
 
 export async function addReview(req, res) {

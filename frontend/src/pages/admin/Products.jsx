@@ -140,7 +140,7 @@ export default function AdminProducts() {
                             setSellerFilter(e.target.value);
                             setPage(1);
                         }}
-                        className="h-10 w-full text-sm sm:w-auto sm:min-w-44"
+                        className="h-12 w-full text-sm sm:w-auto sm:min-w-44"
                     >
                         <option value="">All sellers</option>
                         {sellers.map((s) => (
@@ -157,7 +157,7 @@ export default function AdminProducts() {
                             setStatusFilter(e.target.value);
                             setPage(1);
                         }}
-                        className="h-10 w-full text-sm sm:w-auto sm:min-w-40"
+                        className="h-12 w-full text-sm sm:w-auto sm:min-w-40"
                     >
                         <option value="">Any status</option>
                         <option value="Active">Active</option>

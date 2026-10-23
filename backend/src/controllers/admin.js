@@ -83,8 +83,8 @@ export const updateInventory = async (req, res) => {
 };
 export const inventory = async (req, res) => {
     let q = req.user.role === 'Seller' ? {sellerId: req.user.sub} : {};
-    if (req.query.view === 'low') q = {stock: {$gt: 0, $lte: 5}};
-    if (req.query.view === 'out') q = {stock: 0};
+    if (req.query.view === 'low') q = {...q, stock: {$gt: 0, $lte: 5}};
+    if (req.query.view === 'out') q = {...q, stock: 0};
     res.json(await Product.find(q))
 };
 export const sellerStats = async (req, res) => {
@@ -121,10 +121,10 @@ export const sellerStats = async (req, res) => {
     });
 };
 export const stats = async (req, res) => {
-    const [users, products, orders, customers, sellers, pendingSellers, activeProducts] = await Promise.all([User.countDocuments(), Product.countDocuments(), Order.find().sort({createdAt: -1}), User.countDocuments({role: 'Customer'}), User.countDocuments({role: 'Seller'}), User.countDocuments({
+    const [users, products, orders, customers, sellers, pendingSellers, activeProducts, productDocs] = await Promise.all([User.countDocuments(), Product.countDocuments(), Order.find().sort({createdAt: -1}), User.countDocuments({role: 'Customer'}), User.countDocuments({role: 'Seller'}), User.countDocuments({
         role: 'Seller',
         approvalStatus: 'Pending'
-    }), Product.countDocuments({status: 'Active'})]);
+    }), Product.countDocuments({status: 'Active'}), Product.find().select('category price soldCount')]);
     const statuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
     const ordersByStatus = statuses.map(name => ({name, value: orders.filter(o => o.status === name).length}));
     const revenue = orders.filter(o => o.status !== 'Cancelled').reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
@@ -142,10 +142,21 @@ export const stats = async (req, res) => {
             orders: monthOrders.length
         };
     });
+    const productCategory = Object.fromEntries(productDocs.map(p => [String(p._id), p.category]));
+    const categoryTotals = {};
+    orders.filter(o => o.status !== 'Cancelled').forEach(order => (order.items || []).forEach(item => {
+        const category = productCategory[String(item.productId)] || 'Other';
+        categoryTotals[category] = (categoryTotals[category] || 0) + Number(item.price || 0) * Number(item.qty || item.quantity || 1);
+    }));
+    const categorySplit = Object.entries(categoryTotals).map(([name, value]) => ({
+        name,
+        value
+    })).filter(x => x.value > 0);
     res.json({
         snapshot: {
             users,
             products,
+            totalUsers: users,
             totalCustomers: customers,
             totalSellers: sellers,
             pendingSellers,
@@ -156,12 +167,11 @@ export const stats = async (req, res) => {
             lowStock: await Product.countDocuments({stock: {$gt: 0, $lte: 5}}),
             outOfStock: await Product.countDocuments({stock: 0}),
             avgOrderValue: orders.length ? revenue / orders.length : 0,
-            totalUsers: users,
             orders: orders.length,
             revenue,
             ordersByStatus,
-            categorySplit: []
-        }, sales, orders
+            categorySplit
+        }, categorySplit, sales, orders
     });
 };
 export const categories = async (req, res) => res.json(await Category.find());

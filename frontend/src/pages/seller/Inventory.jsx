@@ -1,10 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {
-    FaBan,
-    FaBoxOpen,
-    FaCircleCheck,
-    FaTriangleExclamation,
-} from "react-icons/fa6";
+import {FaBan, FaBoxOpen, FaCircleCheck, FaTriangleExclamation,} from "react-icons/fa6";
 import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import DataTable from "../../components/ui/DataTable";
@@ -22,7 +17,7 @@ import {useToast} from "../../context/ToastContext";
 export default function SellerInventory() {
     const {notify} = useToast();
     const {user} = useAuth();
-    const sellerId = user?.sellerId || "s1";
+    const sellerId = user?._id || user?.id;
 
     const [rows, setRows] = useState(null);
     const [search, setSearch] = useState("");
@@ -37,7 +32,7 @@ export default function SellerInventory() {
     const mine = useMemo(
         () =>
             (rows || []).filter(
-                (r) => r.product && r.product.sellerId === sellerId
+                (r) => r.product && (!sellerId || String(r.product.sellerId) === String(sellerId))
             ),
         [rows, sellerId]
     );
@@ -170,7 +165,7 @@ export default function SellerInventory() {
                         name="invLevel"
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
-                        className="h-10 w-full text-sm sm:w-auto sm:min-w-40"
+                        className="h-12 w-full text-sm sm:w-auto sm:min-w-40"
                     >
                         <option value="">All stock levels</option>
                         <option value="low">Low stock only</option>

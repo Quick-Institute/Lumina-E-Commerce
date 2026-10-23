@@ -149,9 +149,10 @@ export default function SellerRegister() {
                             label={
                                 <span className="text-sm leading-relaxed text-slate-500">
                   I agree to the{" "}
-                                    <Link to="/"
+                                    <Link to="/seller-terms-and-conditions"
                                           className="font-semibold text-primary-700 hover:underline">Seller Terms &amp; Conditions</Link>,{" "}
-                                    <Link to="/" className="font-semibold text-primary-700 hover:underline">Marketplace Policy</Link>, and understand that my store
+                                    <Link to="/marketplace-policy"
+                                          className="font-semibold text-primary-700 hover:underline">Marketplace Policy</Link>, and understand that my store
                   application is subject to manual review
                 </span>
                             }

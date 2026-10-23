@@ -204,7 +204,8 @@ export default function AdminSellerDetails() {
                     }}
                     aria-hidden="true"
                 >
-                    {initials}
+                    {seller.avatar ? <img src={seller.avatar} alt={seller.storeName}
+                                          className="h-full w-full rounded-2xl object-cover"/> : initials}
                 </div>
 
                 <div className="flex min-w-0 flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -265,7 +266,7 @@ export default function AdminSellerDetails() {
                             {[
                                 ["Business Name", seller.businessName || seller.storeName],
                                 ["Business Description", seller.description],
-                                ["Business Address", seller.address],
+                                ["Business Address", seller.businessAddress || seller.address],
                                 ["Business Phone", seller.phone],
                             ].map(([k, v]) => (
                                 <div key={k}>
@@ -396,10 +397,9 @@ export default function AdminSellerDetails() {
                                         <div key={p.id} className="rounded-xl border border-slate-200 bg-white p-4">
                                             <div className="flex items-start gap-3">
                                                 <ProductImage
-                                                    src={p.imageUrl}
-                                                    alt=""
+                                                    product={p}
                                                     className="h-12 w-12 shrink-0 rounded-lg"
-                                                    fallbackLetter={p.name.charAt(0)}
+                                                    iconSize={18}
                                                 />
                                                 <div className="min-w-0 flex-1">
                                                     <p className="truncate font-bold text-ink-900">{p.name}</p>
@@ -456,10 +456,9 @@ export default function AdminSellerDetails() {
                                                 <td className="px-6 py-3">
                                                     <div className="flex items-center gap-3">
                                                         <ProductImage
-                                                            src={p.imageUrl}
-                                                            alt=""
+                                                            product={p}
                                                             className="h-9 w-9 shrink-0 rounded-lg"
-                                                            fallbackLetter={p.name.charAt(0)}
+                                                            iconSize={15}
                                                         />
                                                         <span
                                                             className="truncate font-bold text-ink-900 max-w-[200px] xl:max-w-[280px]">

@@ -2,18 +2,18 @@ import React, {useEffect, useMemo, useState} from "react";
 import {Link, useParams} from "react-router-dom";
 import {
     FaArrowLeft,
+    FaArrowRightToBracket,
     FaCalendarDay,
+    FaCircleXmark,
+    FaEnvelope,
     FaIdCard,
+    FaListUl,
     FaLocationArrow,
     FaLocationDot,
     FaPhone,
     FaRegEnvelope,
     FaRegUser,
     FaShieldHalved,
-    FaArrowRightToBracket,
-    FaListUl,
-    FaCircleXmark,
-    FaEnvelope,
 } from "react-icons/fa6";
 import Badge, {OrderStatusBadge} from "../../components/ui/Badge";
 import {PageSpinner} from "../../components/ui/Spinner";
@@ -22,7 +22,7 @@ import {Select} from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import Dropdown, {DropdownItem} from "../../components/ui/Dropdown";
 import {ConfirmDialog} from "../../components/ui/Modal";
-import {formatDate, formatPrice, formatNumber} from "../../utils/format";
+import {formatDate, formatNumber, formatPrice} from "../../utils/format";
 import {getUserDetail, setUserStatus} from "../../services/accountService";
 import {useToast} from "../../context/ToastContext";
 
@@ -80,6 +80,7 @@ export default function AdminUserDetails() {
     }
 
     const isActive = user.status === "Active";
+    const vsAverage = Number(stats?.vsAverage) || 0;
     const serial = `USR-${10000 + (Number(String(user.id).replace(/\D/g, "")) || 0) * 293}-X`;
 
     const applyToggle = async () => {
@@ -113,7 +114,8 @@ export default function AdminUserDetails() {
                 <div className="flex items-start gap-3 sm:gap-4">
                     <span
                         className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-lg font-extrabold text-indigo-600 sm:h-16 sm:w-16 sm:text-xl">
-                        {(user.name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                        {user.avatar ? <img src={user.avatar} alt={user.name || "User"}
+                                            className="h-full w-full rounded-2xl object-cover"/> : (user.name || "?").split(" ").map((w) => w[0]).slice(0, 2).join("")}
                     </span>
 
                     <div className="min-w-0 flex-1">
@@ -250,8 +252,8 @@ export default function AdminUserDetails() {
                             {
                                 label: "Total Orders",
                                 value: formatNumber(stats.totalOrders),
-                                chip: `${stats.vsAverage >= 0 ? "↑" : "↓"} ${Math.abs(stats.vsAverage)}% vs avg`,
-                                tone: stats.vsAverage >= 0 ? "text-emerald-600" : "text-red-500"
+                                chip: `${vsAverage >= 0 ? "↑" : "↓"} ${Math.abs(vsAverage)}% vs avg`,
+                                tone: vsAverage >= 0 ? "text-emerald-600" : "text-red-500"
                             },
                             {
                                 label: "Total Spent",
